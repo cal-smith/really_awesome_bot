@@ -12,7 +12,7 @@ if ( !String.prototype.contains ) {
 }
 
 client.addListener('message'+chan, function(from, message){
-	if (message.match(/yesman/i)) {
+	if (message.match(/^yesman/i)) {
 		if (message.search(/\s+search\s+/i) != -1){
 			var split = message.search(/\s+search\s+/i);
 			var search = message.slice(split + 8)
