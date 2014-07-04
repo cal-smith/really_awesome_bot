@@ -95,10 +95,10 @@ This funcationality allows for all sorts of interesting scripts to be built, go 
 *Why node-irc 0.2.x?*  
 Because it was installed and I haven't had time to update to the 0.3.x branch yet. I will. Promise!
 
-*An extension isn't running?*
+*An extension isn't running?*  
 Make sure you have the relevent plugin installed and you have run `yesman reload`. If your extension lacks a plugin, either make one, or bug the maintainer untill they do it.
 
-*THINGS ARE FAILING AND EVERYTHING IS AWFUL*
+*THINGS ARE FAILING AND EVERYTHING IS AWFUL*  
 Either the node version you are using is horribly out of date and breaking everything, or *something* I am using is horribly out of date and breaking everything. Post an issue with your node version and what is breaking.
 
 None of the above applicable? Need more immidiate help? want to play with yesman and break him as I'm working on stuff? join irc.reallyawesomedomain.com #main and/or #yesman
