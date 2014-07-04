@@ -1,0 +1,6 @@
+{
+	"command":"ruby",
+	"type":"ruby",
+	"execute":"ruby.rb",
+	"help":"null"	
+}

@@ -1,0 +1,6 @@
+{
+	"command":"top",
+	"type":"node",
+	"execute":"toppost.js",
+	"help":"null"	
+}
