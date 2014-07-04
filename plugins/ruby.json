@@ -2,5 +2,6 @@
 	"command":"ruby",
 	"type":"ruby",
 	"execute":"ruby.rb",
+	"response":"Loading...",
 	"help":"null"	
 }

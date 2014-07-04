@@ -40,21 +40,6 @@ function start(){
 }
 start();
 
-/*
-get a list of json files ("plugins") from /plugins
-get a list of js files ("extensins") from /extensions
-plugins use basic json + regex's here to match strings and respond
-ex: 'match: "ping"'' gets matched by: yesman ping and responds with: 'response: "pong"'
-lets also let json files do some basic web stuff
-not sure how that will be defined, but it will end up just being args that are invoked after a regex is matched
-
-extensions will load into the bot. 
-lets provied some nice high level functions that abstract a lot of the grunt work
-designed for doing things like setting up posting to reddit, deploying things, singing songs, database searches, ryancoin, subreddit management, etc
-things that cant just be simplified down to command -> response no matter how much magic we throw at it
-
-json files define extension arch, bot code exposes irc listenting capabilitys. extension creators will have to listen for and respond to messages on their own. this is probably the most flexible way to do it.
-*/
 if ( !String.prototype.contains ) {//string contains polyfill. cause contains is prettyer ;3
     String.prototype.contains = function() {
         return String.prototype.indexOf.apply( this, arguments ) !== -1;

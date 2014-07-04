@@ -75,6 +75,8 @@ To break things down:
 - execute: file to execute
 - help: usefull help text
 
+You can also add a `response` and it will be output before the program executes. This is a good idea on long running programs where the final response may take some time (ie: "response":"Loading...").
+
 Any output (console.log, puts, printf) will be taken by yesman as input, and output to irc as a result. For example:
 
 ```ruby
