@@ -47,7 +47,7 @@ see `demo_plugins/` or the bundled `plugins/' directory for some sample plugins.
 
 A useful help text should be provided with every plugin.
 
-##extensions
+##Extensions
 
 Extensions are fairly straight forward as well. They simply add another component and a few more options to the plugin system. Every extension comes in two parts: a plugin, and a related script. it is preferable to keep the plugin and extension naming the similar, if not the same (ex: myext.json, myext.js). Extensions are whole self contained scripts/executables with their own dependencies, and are simply run by yesman which captures the output and prints it when the extension has exited.
 
