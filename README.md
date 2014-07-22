@@ -43,7 +43,7 @@ To break things down:
 - response: the command response
 - help: relevent help on the command
 
-see `demo_plugins/` or the bundled `plugins/' directory for some sample plugins.
+see `demo_plugins/` or the bundled `plugins/` directory for some sample plugins.
 
 A useful help text should be provided with every plugin.
 
