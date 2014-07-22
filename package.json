@@ -1,0 +1,8 @@
+{
+	"name": "really-awesome-bot",
+	"version": "0.0.1",
+	"private": "true",
+	"dependencies": {
+		"irc": "*"
+	}
+}

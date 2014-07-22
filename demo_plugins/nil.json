@@ -1,5 +1,7 @@
 {
 	"command":"nil",
+	"type":"nil",
 	"response":"nil",
+	"execute":"nil",
 	"help":"nil"
 }

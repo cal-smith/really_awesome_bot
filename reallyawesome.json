@@ -1,4 +1,6 @@
 {
+	"name":"yesman",
+	"server":"irc.reallyawesomedomain.com",
 	"chan":["#main", "#yesman"],
 	"op":"hansolo669",
 	"windows":true
