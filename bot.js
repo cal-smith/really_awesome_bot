@@ -10,11 +10,13 @@ if ( !String.prototype.contains ) {//string contains polyfill.
     };
 }
 
+var bot.prototype = new events.EventEmitter;
+
 exports.say = function(response){
 	client.say(channel, response);
 }
 
-exports.listen = function(opts, callback){
+exports.register = function(opts, callback){
 	plugins.push(opts);
 	
 	callback();
@@ -97,41 +99,9 @@ function start(){
 				if (message.match(/\s+\w+\s+help/i)){//stops the help plugin, and other plugins, from emmiting the default help
 					return false;
 				} else if (message.match(re)){//regular expressions ftw! we can match anything including * (wildcard) commands ... cause its regexp
-					
-					if (plugins[i].execute){
-						var type;
-						switch(plugins[i].type){
-							case "ruby":
-							case "rb":
-								if (conf.windows) {
-									type = "ruby.exe";
-								} else{
-									type = "ruby";
-								}
-								break;
-							case "js":
-							case "node":
-							case "javascript":
-								type = "node";
-								break;
-							case "bash":
-							case "sh":
-							case "shell":
-								type = "sh";
-								break;
-							case "python":
-							case "py":
-								type = "python";
-								break;
-						}
-						exec(type + ' extensions/' + plugins[i].execute + ' ' + message + ' ' + from, function(error, stdout, stderr){
-							console.log(stderr);
-							console.log(stdout);
-							client.say(channel, stdout);
-						});
-					}
+					bot.emit(plugins[i].command, message);
 					console.log(message.match(re));
-					client.say(channel, plugins[i].response);
+					//client.say(channel, plugins[i].response);
 				}
 			}
 			console.log(message);

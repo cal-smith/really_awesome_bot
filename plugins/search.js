@@ -4,7 +4,7 @@ var bot = require('../bot.js');
 lol.on("search", function(){
 
 });
-bot.listen({
+bot.register({
 	"command":"search",
 	"type":"node",
 	"execute":"search.js",
