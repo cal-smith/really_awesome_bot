@@ -2,11 +2,22 @@ var irc = require('irc');
 var exec = require('child_process').exec;
 fs = require('fs');
 var path = require('path');
+var events = equire("events");
 
 if ( !String.prototype.contains ) {//string contains polyfill.
     String.prototype.contains = function() {
         return String.prototype.indexOf.apply( this, arguments ) !== -1;
     };
+}
+
+exports.say = function(response){
+	client.say(channel, response);
+}
+
+exports.listen = function(opts, callback){
+	plugins.push(opts);
+	
+	callback();
 }
 
 //plugin loading here
@@ -16,9 +27,9 @@ function reload(){
 	fs.readdir(__dirname+'/plugins', function(err, files){
 		for (var i = 0; i < files.length; i++) {
 			var input = path.join(__dirname + '/plugins/'+files[i]);
-			fs.readFile(input, function(err,data){
+			/*fs.readFile(input, function(err,data){
 				loaded(JSON.parse(data));
-			});
+			});*/
 		}
 	});
 	function loaded(data){
@@ -53,12 +64,12 @@ function start(){
 		var namer = "^" + conf.name;
 		namer = new RegExp(namer, "i");
 		if (message.match(namer)) {
-			if (message.search(/\s+search\s+/i) != -1){
+			/*if (message.search(/\s+search\s+/i) != -1){
 				var split = message.search(/\s+search\s+/i);
 				var search = message.slice(split + 8);
 				search = encodeURIComponent(search);
 				client.say(channel, from+" Searched for: https://www.google.ca/search?q="+search);
-			}
+			}*/
 			if(message.match(/\s+commands/i)){
 				var response = "Commands: [built in: search, reload] ";
 				for (var i = 0; i < plugins.length; i++) {
@@ -86,6 +97,7 @@ function start(){
 				if (message.match(/\s+\w+\s+help/i)){//stops the help plugin, and other plugins, from emmiting the default help
 					return false;
 				} else if (message.match(re)){//regular expressions ftw! we can match anything including * (wildcard) commands ... cause its regexp
+					
 					if (plugins[i].execute){
 						var type;
 						switch(plugins[i].type){
@@ -112,7 +124,7 @@ function start(){
 								type = "python";
 								break;
 						}
-						exec(type + ' extensions/' + plugins[i].execute, function(error, stdout, stderr){
+						exec(type + ' extensions/' + plugins[i].execute + ' ' + message + ' ' + from, function(error, stdout, stderr){
 							console.log(stderr);
 							console.log(stdout);
 							client.say(channel, stdout);

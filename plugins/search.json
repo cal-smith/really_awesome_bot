@@ -1,0 +1,6 @@
+{
+	"command":"search",
+	"type":"node",
+	"execute":"search.js",
+	"help":"returns a google search url"
+}
