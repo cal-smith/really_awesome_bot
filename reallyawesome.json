@@ -1,7 +1,7 @@
 {
-	"name":"yesman",
-	"server":"irc.reallyawesomedomain.com",
-	"chan":["#main", "#yesman"],
-	"op":"hansolo669",
-	"windows":true
+	"scripts": ["search.js"],
+	"name": "yesman",
+	"server": "pluto",
+	"chan": ["#main", "#yesman"],
+	"op": "null"
 }

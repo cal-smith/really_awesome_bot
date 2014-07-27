@@ -1,5 +1,0 @@
-{
-	"command":"help",
-	"response":"I am yesman. Commands can be listed with 'yesman commands'. Additional help can be recived with 'yesman <command here> help'.",
-	"help":"this command already provides help. simply issue: yesman help"
-}

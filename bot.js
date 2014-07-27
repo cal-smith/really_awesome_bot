@@ -9,36 +9,26 @@ if ( !String.prototype.contains ) {//string contains polyfill.
     };
 }
 
-//plugin loading here
 var plugins = [];//init plugin global
-function reload(){
-	plugins = [];//clear global
-	fs.readdir(__dirname+'/plugins', function(err, files){
+var conf = {};//init conf global
+var client;//init client global
+function init(){
+	fs.readdir('./plugins', function(err, files){
 		for (var i = 0; i < files.length; i++) {
-			var input = path.join(__dirname + '/plugins/'+files[i]);
-			fs.readFile(input, function(err,data){
-				loaded(JSON.parse(data));
-			});
+			var plugin = require('./plugins/'+files[i]);
+			plugins.push(plugin);
 		}
 	});
-	function loaded(data){
-		plugins.push(data);
-	}
-};
-reload();
-
-var conf = {};//init conf global
-var client;
-function init(){
 	fs.readFile(path.join(__dirname + '/reallyawesome.json'), function(err,data){
 		conf = (JSON.parse(data));
 		console.log(conf.chan);
 		client = new irc.Client(conf.server, conf.name,{
-			userName:conf.name,
-			realName:'ReallyAwesomeBot.js',
+			userName: conf.name,
+			realName: 'ReallyAwesomeBot.js',
 			autoConnect: false//so we dont go connecting before we load the conf and break EVERYTHING AAAAAHHHHHHHHHHHHHHHH
 		});
-		client.connect(function(){//yes the client joins after the conf is loaded. just to make sure we connect to the right channels
+
+		client.connect(function(){
 			for (var i = 0; i < conf.chan.length; i++) {//loops through the chans and connects to each
 				client.join(conf.chan[i]);
 			};
@@ -49,77 +39,85 @@ function init(){
 init();
 
 function start(){
-	client.addListener('message', function(from, channel, message){
+	for (var i = 0; i < conf.chan.length; i++) {
+		var chan = conf.chan[i];
+		new addbot(chan);//add listner to each channel. keeps the plugins from invading other channels
+
+	}
+	function addbot(chan){
+		/*
+		* our bot!
+		* each extension gets a copy of this, plus some additional paramaters
+		* bot.name
+		* bot.content
+		* bot.from
+		*/
+		var bot = {
+			listen : function(c, callback){
+				var namer = "^" + conf.name;
+				namer = new RegExp(namer, "i");
+				if (bot.message.match(namer)) {
+					var command = bot.message.split(" ");
+					command = command[1];
+					if (command.match(c)) {
+						var commandregex = "^" + command;
+						commandregex = new RegExp(commandregex, "i");
+						var content = bot.message.replace(namer, " ").trim();
+						content = content.replace(commandregex, " ").trim();
+						callback(content, bot.from);
+					}
+				}
+			},
+			on : function(m, callback){
+				if (bot.message.match(m)){
+					callback(bot.message, bot.from);
+				}
+			},
+			name: conf.name
+		}
+
+		client.addListener('message' + chan, function(from, message){
+			bot.say = function(response){//say things
+				console.log(chan);
+				chan === conf.name ? client.say(from, response) : client.say(chan, response);
+			}
+
+			bot.respond = function(response){//send private messages
+				client.say(from, response);
+			}
+
+			bot.message = message;//so we know what the message is
+			bot.from = from;//so we know who its from
+			bot.channel = chan;
+			for (var i = 0; i < plugins.length; i++) {
+				plugins[i](bot);
+			};
+		});
+	}
+
+	//add listener for private messages only
+
+	client.addListener('message', function(from, channel, message){		
 		var namer = "^" + conf.name;
 		namer = new RegExp(namer, "i");
 		if (message.match(namer)) {
-			if (message.search(/\s+search\s+/i) != -1){
-				var split = message.search(/\s+search\s+/i);
-				var search = message.slice(split + 8);
-				search = encodeURIComponent(search);
-				client.say(channel, from+" Searched for: https://www.google.ca/search?q="+search);
-			}
 			if(message.match(/\s+commands/i)){
-				var response = "Commands: [built in: search, reload] ";
+				var response = "Commands: ";
 				for (var i = 0; i < plugins.length; i++) {
-					response += plugins[i].command+", ";
+					if (typeof plugins[i].command !== "undefined"){
+						console.log(i, plugins.length);
+						i === plugins.length ? response += plugins[i].command : response += plugins[i].command + ", ";
+					}
 				}
 				client.say(channel, response);
 			}
-			if(message.match(/\s+reload/i)){
-				if (conf.op.contains(from)){//checks if the sender is an allowed op.
-					client.say(channel, "Reloading plugins!");
-					reload();//reloads
-				}
-			}
-			if(message.match(/\s+\w+\s+help/i)){//checks if the help command is precceded by a word and some spaces
-				var help = message.split(" ");//splits on spaces
+
+			if(message.match(/\s+help/i)){
+				var help = message.split(" ");
 				for (var i = 0; i < plugins.length; i++) {//loops through the plugins till it finds the correct one, then outputs its help contents
-					if (plugins[i].command == help[1]){
+					if (plugins[i].command === help[2]){
 						client.say(channel, plugins[i].help);
 					}
-				}
-			}
-			for (var i = 0; i < plugins.length; i++) {//loops over the plugins, checks if the message matches, and outputs the response.
-				var r = "\\s" + plugins[i].command;
-				var re = new RegExp(r,"i");
-				if (message.match(/\s+\w+\s+help/i)){//stops the help plugin, and other plugins, from emmiting the default help
-					return false;
-				} else if (message.match(re)){//regular expressions ftw! we can match anything including * (wildcard) commands ... cause its regexp
-					if (plugins[i].execute){
-						var type;
-						switch(plugins[i].type){
-							case "ruby":
-							case "rb":
-								if (conf.windows) {
-									type = "ruby.exe";
-								} else{
-									type = "ruby";
-								}
-								break;
-							case "js":
-							case "node":
-							case "javascript":
-								type = "node";
-								break;
-							case "bash":
-							case "sh":
-							case "shell":
-								type = "sh";
-								break;
-							case "python":
-							case "py":
-								type = "python";
-								break;
-						}
-						exec(type + ' extensions/' + plugins[i].execute, function(error, stdout, stderr){
-							console.log(stderr);
-							console.log(stdout);
-							client.say(channel, stdout);
-						});
-					}
-					console.log(message.match(re));
-					client.say(channel, plugins[i].response);
 				}
 			}
 			console.log(message);
