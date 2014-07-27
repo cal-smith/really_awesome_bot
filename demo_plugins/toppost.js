@@ -1,1 +1,0 @@
-console.log("yay I'm an external js script");

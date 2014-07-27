@@ -1,5 +1,0 @@
-{
-	"command":"*",
-	"response":"yes",
-	"help":"responds to any command with 'yes'"
-}
