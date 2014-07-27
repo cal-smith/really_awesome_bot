@@ -2,7 +2,7 @@ var irc = require('irc');
 var exec = require('child_process').exec;
 fs = require('fs');
 var path = require('path');
-var events = equire("events");
+var EventEmitter = require("events").EventEmitter;
 
 if ( !String.prototype.contains ) {//string contains polyfill.
     String.prototype.contains = function() {
@@ -10,39 +10,46 @@ if ( !String.prototype.contains ) {//string contains polyfill.
     };
 }
 
-var bot.prototype = new events.EventEmitter;
-
-exports.say = function(response){
-	client.say(channel, response);
+/*
+* our bot!
+* each extension gets a copy of this, plus some additional paramaters
+* bot.name
+* bot.content
+* bot.from
+*/
+var bot = {
+	listen : function(c, callback){
+		var namer = "^" + conf.name;
+		namer = new RegExp(namer, "i");
+		if (bot.message.match(namer)) {
+			var command = bot.message.split(" ");
+			command = command[1];
+			if (command.match(c)) {
+				var commandregex = "^" + command;
+				commandregex = new RegExp(commandregex, "i");
+				var content = bot.message.replace(namer, " ").trim();
+				content = content.replace(commandregex, " ").trim();
+				callback(content, bot.from);
+			}
+		}
+	},
+	on : function(m, callback){
+		if (bot.message.match(m)){
+			callback(bot.message, bot.from);
+		}
+	}
 }
 
-exports.register = function(opts, callback){
-	plugins.push(opts);
-	
-	callback();
-}
-
-//plugin loading here
 var plugins = [];//init plugin global
-function reload(){
-	plugins = [];//clear global
-	fs.readdir(__dirname+'/plugins', function(err, files){
+var conf = {};//init conf global
+var client;//init client global
+function init(){
+	fs.readdir(__dirname+'/extensions', function(err, files){
 		for (var i = 0; i < files.length; i++) {
-			var input = path.join(__dirname + '/plugins/'+files[i]);
-			/*fs.readFile(input, function(err,data){
-				loaded(JSON.parse(data));
-			});*/
+			var plugin = require('./extensions/'+files[i]);
+			plugins.push(plugin);
 		}
 	});
-	function loaded(data){
-		plugins.push(data);
-	}
-};
-reload();
-
-var conf = {};//init conf global
-var client;
-function init(){
 	fs.readFile(path.join(__dirname + '/reallyawesome.json'), function(err,data){
 		conf = (JSON.parse(data));
 		console.log(conf.chan);
@@ -56,6 +63,7 @@ function init(){
 				client.join(conf.chan[i]);
 			};
 		});
+		bot.name = conf.name;
 		start();
 	});
 };
@@ -63,45 +71,39 @@ init();
 
 function start(){
 	client.addListener('message', function(from, channel, message){
+		
+		bot.say = function(response){
+			client.say(channel, response);
+		}
+
+		bot.message = message;//so we know what the message is
+		bot.from = from;//so we know who its from
+
+		//call the plugins!
+		for (var i = 0; i < plugins.length; i++) {
+			console.log(i);
+			plugins[i](bot);
+		};
+
 		var namer = "^" + conf.name;
 		namer = new RegExp(namer, "i");
 		if (message.match(namer)) {
-			/*if (message.search(/\s+search\s+/i) != -1){
-				var split = message.search(/\s+search\s+/i);
-				var search = message.slice(split + 8);
-				search = encodeURIComponent(search);
-				client.say(channel, from+" Searched for: https://www.google.ca/search?q="+search);
-			}*/
 			if(message.match(/\s+commands/i)){
-				var response = "Commands: [built in: search, reload] ";
+				var response = "Commands: ";
 				for (var i = 0; i < plugins.length; i++) {
-					response += plugins[i].command+", ";
+					if (typeof plugins[i].command !== "undefined"){
+						response += plugins[i].command + ", ";
+					}
 				}
 				client.say(channel, response);
 			}
-			if(message.match(/\s+reload/i)){
-				if (conf.op.contains(from)){//checks if the sender is an allowed op.
-					client.say(channel, "Reloading plugins!");
-					reload();//reloads
-				}
-			}
-			if(message.match(/\s+\w+\s+help/i)){//checks if the help command is precceded by a word and some spaces
-				var help = message.split(" ");//splits on spaces
+
+			if(message.match(/\s+help/i)){
+				var help = message.split(" ");
 				for (var i = 0; i < plugins.length; i++) {//loops through the plugins till it finds the correct one, then outputs its help contents
-					if (plugins[i].command == help[1]){
+					if (plugins[i].command == help[2]){
 						client.say(channel, plugins[i].help);
 					}
-				}
-			}
-			for (var i = 0; i < plugins.length; i++) {//loops over the plugins, checks if the message matches, and outputs the response.
-				var r = "\\s" + plugins[i].command;
-				var re = new RegExp(r,"i");
-				if (message.match(/\s+\w+\s+help/i)){//stops the help plugin, and other plugins, from emmiting the default help
-					return false;
-				} else if (message.match(re)){//regular expressions ftw! we can match anything including * (wildcard) commands ... cause its regexp
-					bot.emit(plugins[i].command, message);
-					console.log(message.match(re));
-					//client.say(channel, plugins[i].response);
 				}
 			}
 			console.log(message);
