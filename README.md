@@ -57,6 +57,7 @@ or just get evey message:
 bot.on("Regex", function(message, from){
 	//callback function for your magic
 });
+````
 
 see `demo_plugins/` or the bundled `plugins/` directory for some sample plugins.
 
