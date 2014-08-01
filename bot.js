@@ -13,9 +13,9 @@ var plugins = [];//init plugin global
 var conf = {};//init conf global
 var client;//init client global
 function init(){
-	fs.readdir('./plugins', function(err, files){
+	fs.readdir(path.join(__dirname + './plugins'), function(err, files){
 		for (var i = 0; i < files.length; i++) {
-			var plugin = require('./plugins/'+files[i]);
+			var plugin = require(path.join(__dirname + './plugins/' + files[i]));
 			plugins.push(plugin);
 		}
 	});
