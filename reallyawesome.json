@@ -1,5 +1,4 @@
 {
-	"scripts": ["search.js"],
 	"name": "yesman",
 	"server": "pluto",
 	"chan": ["#main", "#yesman"],

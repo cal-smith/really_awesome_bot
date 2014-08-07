@@ -50,7 +50,7 @@ bot.listen("CommandRegex", function(message, from){
 });
 ```
 
-or just get evey message:
+or just get every message:
 
 ```JavaScript
 //can be used to implement entirely custom commands, or to match arbitrary words in messages
@@ -59,22 +59,44 @@ bot.on("Regex", function(message, from){
 });
 ````
 
-see `demo_plugins/` or the bundled `plugins/` directory for some sample plugins.
+###Identifying your plugin
+
+It is important to identify your plugin so that users can find it, or get help for it.  
+`module.exports.command` gives your plugin a name that will show up in the list of plugins when a user sends "<botname> plugins"  
+`module.exports.help` gives your plugin some help text that is returned when a user sends "<botname> help <your plugin>"  
+You can also use `module.exports.command` to identify your plugin ie: `module.exports.command = "topato responder 2.0"`  
+And now a small example via the included search plugin:  
+```JavaScript
+module.exports = function (bot){
+	bot.listen("search", function(message, from){
+		var search = encodeURIComponent(message);
+		bot.say(from + " Searched for: https://www.google.ca/search?q=" + search);
+	});
+	module.exports.command = "search";
+	module.exports.help = "Returns a Google search URL"
+}
+```
+
+See the `demo_plugins/` directory for some sample plugins,  or browse `plguins/` to see what we include.
 
 ###Kinda Sorta Docs
 
-`bot.listen(regex, callback)` If the bot recives a command and `regex` matches it, `callback` is called
+`bot.listen(regex, callback)` If the bot receives a command and `regex` matches it, `callback` is called
 
-`bot.on(regex, callback)` Whenever a message is recived `regex` is checked agaist it, and `callback` is invoked on matches.
+`bot.on(regex, callback)` Whenever a message is received and `regex` matches it, `callback` is called
 
 `bot.say(message)` Send messages back
 
-`bot.respond(message)` Send messages to the poor sod who dared talk to such a robot
+`bot.respond(message)` Send messages to the poor sod who dared talk to such a majestic robot
+
+`module.exports.command` String that identifys the plugin
+
+`module.exports.help` String of helpful text
 
 
 ##Help
 
-First things first, make sure you installed node-irc and any dependancys plugins you may be using have. The fist part should be taken care of if you run `npm install` in the bot's directory.
+First things first, make sure you installed node-irc and any dependencies plugins you may be using have. The fist part should be taken care of if you run `npm install` in the bot's directory.
 
 *THINGS ARE FAILING AND EVERYTHING IS AWFUL*  
 Either the node version you are using is horribly out of date and breaking everything, or *something* I am using is horribly out of date and breaking everything. Post an issue with your node version and what is breaking.

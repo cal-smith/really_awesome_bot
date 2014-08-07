@@ -41,10 +41,13 @@ init();
 function start(){
 	for (var i = 0; i < conf.chan.length; i++) {
 		var chan = conf.chan[i];
-		new addbot(chan);//add listner to each channel. keeps the plugins from invading other channels
+		new addbot(chan);//istance the bot for each channel. keeps the plugins from invading other channels
 
 	}
-	function addbot(chan){
+
+	new addbot(conf.name, true);//instance the bot for pm's. the channel is the bots name
+
+	function addbot(chan, pm){
 		/*
 		* our bot!
 		* each extension gets a copy of this, plus some additional paramaters
@@ -53,7 +56,7 @@ function start(){
 		* bot.from
 		*/
 		var bot = {
-			listen : function(c, callback){
+			listen : function(c, callback){//listen for commands directed at the bot
 				var namer = "^" + conf.name;
 				namer = new RegExp(namer, "i");
 				if (bot.message.match(namer)) {
@@ -68,7 +71,7 @@ function start(){
 					}
 				}
 			},
-			on : function(m, callback){
+			on : function(m, callback){//passes all messages through
 				if (bot.message.match(m)){
 					callback(bot.message, bot.from);
 				}
@@ -76,10 +79,21 @@ function start(){
 			name: conf.name
 		}
 
-		client.addListener('message' + chan, function(from, message){
+		
+		if (!pm) {//adds a listener either to a whole channel, or just to pm's
+			client.addListener('message' + chan, function(from, message){
+				new reply(from, message);
+			});
+		} else {
+			client.addListener('pm', function(from, message){
+				new reply(from, message);
+			});
+		}
+
+		function reply(from, message){
 			bot.say = function(response){//say things
 				console.log(chan);
-				chan === conf.name ? client.say(from, response) : client.say(chan, response);
+				client.say(chan, response);
 			}
 
 			bot.respond = function(response){//send private messages
@@ -92,17 +106,16 @@ function start(){
 			for (var i = 0; i < plugins.length; i++) {
 				plugins[i](bot);
 			};
-		});
+		}
 	}
 
-	//add listener for private messages only
-
-	client.addListener('message', function(from, channel, message){		
+	client.addListener('message', function(from, channel, message){
 		var namer = "^" + conf.name;
 		namer = new RegExp(namer, "i");
 		if (message.match(namer)) {
-			if(message.match(/\s+commands/i)){
-				var response = "Commands: ";
+			//list all commands from plugins that export their command name (module.exports.command)
+			if(message.match(/\s+plugins/i)){
+				var response = "Plugins: ";
 				for (var i = 0; i < plugins.length; i++) {
 					if (typeof plugins[i].command !== "undefined"){
 						console.log(i, plugins.length);
@@ -112,8 +125,12 @@ function start(){
 				client.say(channel, response);
 			}
 
+			//if a plugin exports help (module.exports.help) respond with that
 			if(message.match(/\s+help/i)){
 				var help = message.split(" ");
+				if (!help[2]){
+					client.say(channel, 'I am ' + conf.name + '. Type "' + conf.name + ' commands" to list avliable commands, or "' + conf.name + ' help <command>" for help with specific commands. Visit https://github.com/hansolo669/really_awesome_bot for info about my circuts.');
+				}
 				for (var i = 0; i < plugins.length; i++) {//loops through the plugins till it finds the correct one, then outputs its help contents
 					if (plugins[i].command === help[2]){
 						client.say(channel, plugins[i].help);
