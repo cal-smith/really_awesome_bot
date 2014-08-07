@@ -18,6 +18,7 @@ function init(){
 			var plugin = require(path.join(__dirname + '/plugins/' + files[i]));
 			plugins.push(plugin);
 		}
+		console.log("Loaded Plugins!");
 	});
 	fs.readFile(path.join(__dirname + '/reallyawesome.json'), function(err,data){
 		conf = (JSON.parse(data));
@@ -76,7 +77,8 @@ function start(){
 					callback(bot.message, bot.from);
 				}
 			},
-			name: conf.name
+			name: conf.name,
+			plugins: plugins
 		}
 
 		
@@ -108,39 +110,6 @@ function start(){
 			};
 		}
 	}
-
-	client.addListener('message', function(from, channel, message){
-		var namer = "^" + conf.name;
-		namer = new RegExp(namer, "i");
-		if (message.match(namer)) {
-			//list all commands from plugins that export their command name (module.exports.command)
-			if(message.match(/\s+plugins/i)){
-				var response = "Plugins: ";
-				for (var i = 0; i < plugins.length; i++) {
-					if (typeof plugins[i].command !== "undefined"){
-						console.log(i, plugins.length);
-						i === plugins.length ? response += plugins[i].command : response += plugins[i].command + ", ";
-					}
-				}
-				client.say(channel, response);
-			}
-
-			//if a plugin exports help (module.exports.help) respond with that
-			if(message.match(/\s+help/i)){
-				var help = message.split(" ");
-				if (!help[2]){
-					client.say(channel, 'I am ' + conf.name + '. Type "' + conf.name + ' commands" to list avliable commands, or "' + conf.name + ' help <command>" for help with specific commands. Visit https://github.com/hansolo669/really_awesome_bot for info about my circuts.');
-				}
-				for (var i = 0; i < plugins.length; i++) {//loops through the plugins till it finds the correct one, then outputs its help contents
-					if (plugins[i].command === help[2]){
-						client.say(channel, plugins[i].help);
-					}
-				}
-			}
-			console.log(message);
-		}
-	});
-
 	client.addListener('error', function(message) {
 	    console.log('error: ', message);
 	});

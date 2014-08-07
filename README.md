@@ -81,9 +81,11 @@ See the `demo_plugins/` directory for some sample plugins,  or browse `plguins/`
 
 ###Kinda Sorta Docs
 
-`bot.listen(regex, callback)` If the bot receives a command and `regex` matches it, `callback` is called
+`bot.listen(regex, callback)` If the bot receives a command and `regex` matches it, `callback` is called  
+`callback` takes two arguments `message` and `from`. `message` is everything after "<botname> <command>", and `from` is the nick of the user who sent it.
 
-`bot.on(regex, callback)` Whenever a message is received and `regex` matches it, `callback` is called
+`bot.on(regex, callback)` Whenever a message is received and `regex` matches it, `callback` is called  
+`callback` takes two arguments `message` and `from`. `message` is the whole message, and `from` is the nick of the user who sent it.
 
 `bot.say(message)` Send messages back
 
